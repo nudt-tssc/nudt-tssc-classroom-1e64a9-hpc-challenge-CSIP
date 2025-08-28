@@ -19,7 +19,7 @@ jobs:
         run: |
             git clone ${{ env.SCRIPT_REPO }} .github/classroom
       - name: Build Evironment
-        run: sudo apt-get install -y openssl;.github/classroom/aes_file dec ./result/cpu.txt ./result/cpu; .github/classroom/aes_file dec ./result/gpu.txt ./result/gpu
+        run: sudo apt-get install -y openssl;chmod +x .github/classroom/aes_file;./.github/classroom/aes_file dec ./result/cpu.txt ./result/cpu; ./.github/classroom/aes_file dec ./result/gpu.txt ./result/gpu
              
       - name: cpu-test
         uses: nudt-tssc/hpc-autograding@master
