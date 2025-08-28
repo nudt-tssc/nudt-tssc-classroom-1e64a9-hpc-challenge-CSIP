@@ -1,0 +1,46 @@
+name: Autograding Tests
+on: 
+  push:
+    branches:
+      - main 
+env:
+  TIMEOUT: 1000 # 超时时间
+  SCRIPT_REPO: https://github.com/nudt-tssc/Evaluation # 脚本仓库
+  
+jobs:  
+  run-autograding-tests:
+    runs-on: ubuntu-latest
+    env:
+      qemu-version: 9.2.1
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      - name: Download EvaluationScript
+        run: |
+            git clone ${{ env.SCRIPT_REPO }} .github/classroom
+      - name: Build Evironment
+        run: sudo apt-get install -y openssl;.github/classroom/aes_file dec ./result/cpu.txt ./result/cpu; .github/classroom/aes_file dec ./result/gpu.txt ./result/gpu
+             
+      - name: cpu-test
+        uses: nudt-tssc/hpc-autograding@master
+        id: cpu-test
+        with:
+          outputfile: ./result/cpu
+          scriptPath: .github/classroom/cpu
+      - name: gpu-test
+        uses: nudt-tssc/hpc-autograding@master
+        id: gpu-test
+        with:
+          outputfile: ./result/gpu
+          scriptPath: .github/classroom/gpu
+          
+      - name: Autograding Reporter
+        uses: nudt-tssc/autograding-grading-reporter@v1
+        env:
+          CPU-TEST_RESULTS: "${{steps.cpu-test.outputs.result}}"
+          GPU-TEST_RESULTS: "${{steps.gpu-test.outputs.result}}"
+        with:
+          runners: cpu-test,gpu-test
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+        
